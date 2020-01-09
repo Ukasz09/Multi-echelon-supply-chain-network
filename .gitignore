@@ -36,3 +36,5 @@
 .vs
 Debug
 *.txt
+*.doc
+*.docx
