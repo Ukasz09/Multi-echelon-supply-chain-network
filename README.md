@@ -9,7 +9,7 @@
  - 🔸 Differential evolution (DE) </br>
    - Metaheuristic algorithm, invented by Storn and Price in 1997 </br></br>
    
-   "DE optimizes a problem by maintaining a population of candidate solutions and creating new candidate solutions by combining existing ones according to its simple formulae, and then keeping whichever candidate solution has the best score or fitness on the optimization problem at hand" [Wikipedia Page]https://en.wikipedia.org/wiki/Differential_evolution </br></br>
+   "DE optimizes a problem by maintaining a population of candidate solutions and creating new candidate solutions by combining existing ones according to its simple formulae, and then keeping whichever candidate solution has the best score or fitness on the optimization problem at hand" [Wikipedia Page](https://en.wikipedia.org/wiki/Differential_evolution) </br></br>
    
    (In other words, it is a black-box optimization which means finding the minimum or maximum of a function f(x): R^n → R, where we don’t know its analytical form) </br>
  - 🔸 Random Search </br>
@@ -21,7 +21,8 @@
     - b) Use no-arg constructor. Manual set quantity of inventory, min and max production capacity and call method ```generateInstance``` with seed for random generator
     - c) Open problem from file (Use parametrized MscnProblem constructor. Data for it you get by making instance of MscnFileManager, than using method ```openFile``` with ```READ_ACCES``` (public static const) parameter and finally calling method ```readProblemFromFile```
     </br></br>
-    Pattern of files format you can find below
+    Pattern of files format you can find below 👇 </br>
+    
 2. Make instance of solution search algorithms (RandomSearch or DiffEvolution)
 3. Call ```findBestSolution``` method 
 
@@ -32,7 +33,7 @@ You can also:
 
 ---
 ##  Pattern of files format
-Available soon ...
+``FileFormat.pdf``` 
  
 ---
 ## Contact
