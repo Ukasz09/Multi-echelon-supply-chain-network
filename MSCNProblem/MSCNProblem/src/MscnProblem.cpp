@@ -15,41 +15,41 @@ MscnProblem::MscnProblem(double* data, int arrSize, errorCodes& err) {
 }
 
 MscnProblem::~MscnProblem() {
-	delete cd;
-	delete cf;
-	delete cm;
+	delete fromSuppliersToFactoriesCost;
+	delete fromFactoriesToStoreCost;
+	delete fromStoreToShopsCost;
 
-	delete xd;
-	delete xf;
-	delete xm;
+	delete qtyOfFeedstockDeliverBySuppliers;
+	delete qtyOfProductDeliverByFactories;
+	delete qtyOfProductDeliverByStore;
 
-	delete xdMin;
-	delete xfMin;
-	delete xmMin;
+	delete qtyOfFeedstockDeliverBySuppliersMin;
+	delete qtyOfProductDeliverByFactoriesMin;
+	delete qtyOfProductDeliverByStoreMin;
 
-	delete xdMax;
-	delete xfMax;
-	delete xmMax;
+	delete qtyOfFeedstockDeliverBySuppliersMax;
+	delete qtyOfProductDeliverByFactoriesMax;
+	delete qtyOfProductDeliverByStoreMax;
 }
 
 void MscnProblem::setDefaultQty() {
-	dQty = DEFAULT_QTY_OF_D;
-	fQty = DEFAULT_QTY_OF_F;
-	mQty = DEFAULT_QTY_OF_M;
-	sQty = DEFAULT_QTY_OF_S;
+	suppliersQty = DEFAULT_SUPPLIERS_QTY;
+	factoriesQty = DEFAULT_FACTORIES_QTY;
+	storeQty = DEFAULT_STORE_QTY;
+	shopsQty = DEFAULT_SHOPS_QTY;
 }
 
 void MscnProblem::resizeAllVectors() {
-	sd.resize(dQty);
-	sf.resize(fQty);
-	sm.resize(mQty);
-	ss.resize(sQty);
+	suppliersManufacturingCapacity.resize(suppliersQty);
+	factoriesManufacturingCapacity.resize(factoriesQty);
+	storeManufacturingCapacity.resize(storeQty);
+	shopsManufacturingCapacity.resize(shopsQty);
 
-	ud.resize(dQty);
-	uf.resize(fQty);
-	um.resize(mQty);
+	oneTimeCostForSupplier.resize(suppliersQty);
+	oneTimeCostForFactories.resize(factoriesQty);
+	oneTimeCostForStore.resize(storeQty);
 
-	ps.resize(sQty);
+	profitFromOnePieceInShops.resize(shopsQty);
 }
 
 MscnProblem::errorCodes MscnProblem::setValuesFromData(double* data, int arrSize) {
@@ -61,7 +61,7 @@ MscnProblem::errorCodes MscnProblem::setValuesFromData(double* data, int arrSize
 	int nextIndex = 0;
 
 	//setting D,F,M,S
-	errorCodes err = setDFMS(data);
+	errorCodes err = setInventory(data);
 	nextIndex = 4;
 	if (err != noErrors)
 		return err;
@@ -73,32 +73,32 @@ MscnProblem::errorCodes MscnProblem::setValuesFromData(double* data, int arrSize
 	resizeAllVectors();
 
 	//sd
-	for (int i = 0; i < dQty; i++) {
-		err = setInSd(data[nextIndex], i);
+	for (int i = 0; i < suppliersQty; i++) {
+		err = setSuppliersManufacturingCapacity(data[nextIndex], i);
 		nextIndex++;
 		if (err != noErrors)
 			return err;
 	}
 
 	//sf
-	for (int i = 0; i < fQty; i++) {
-		err = setInSf(data[nextIndex], i);
+	for (int i = 0; i < factoriesQty; i++) {
+		err = setFactoriesManufacturingCapacity(data[nextIndex], i);
 		nextIndex++;
 		if (err != noErrors)
 			return err;
 	}
 
 	//sm
-	for (int i = 0; i < mQty; i++) {
-		err = setInSm(data[nextIndex], i);
+	for (int i = 0; i < storeQty; i++) {
+		err = setStoreManufacturingCapacity(data[nextIndex], i);
 		nextIndex++;
 		if (err != noErrors)
 			return err;
 	}
 
 	//ss
-	for (int i = 0; i < sQty; i++) {
-		err = setInSs(data[nextIndex], i);
+	for (int i = 0; i < shopsQty; i++) {
+		err = setShopsManufacturingCapacity(data[nextIndex], i);
 		nextIndex++;
 		if (err != noErrors)
 			return err;
@@ -108,84 +108,84 @@ MscnProblem::errorCodes MscnProblem::setValuesFromData(double* data, int arrSize
 	makeMatrixes();
 
 	//cd
-	for (int i = 0; i < dQty; i++)
-		for (int j = 0; j < fQty; j++) {
-			err = setInCd(data[nextIndex], i, j);
+	for (int i = 0; i < suppliersQty; i++)
+		for (int j = 0; j < factoriesQty; j++) {
+			err = setFromSuppliersToFactoriesCost(data[nextIndex], i, j);
 			nextIndex++;
 			if (err != noErrors)
 				return err;
 		}
 	//cf
-	for (int i = 0; i < fQty; i++)
-		for (int j = 0; j < mQty; j++) {
-			err = setInCf(data[nextIndex], i, j);
+	for (int i = 0; i < factoriesQty; i++)
+		for (int j = 0; j < storeQty; j++) {
+			err = setInFromFactoriesToStoreCost(data[nextIndex], i, j);
 			nextIndex++;
 			if (err != noErrors)
 				return err;
 		}
 	//cm
-	for (int i = 0; i < mQty; i++)
-		for (int j = 0; j < sQty; j++) {
-			err = setInCm(data[nextIndex], i, j);
+	for (int i = 0; i < storeQty; i++)
+		for (int j = 0; j < shopsQty; j++) {
+			err = setFromStoreToShopsCost(data[nextIndex], i, j);
 			nextIndex++;
 			if (err != noErrors)
 				return err;
 		}
 
 	//ud
-	for (int i = 0; i < dQty; i++) {
-		err = setInUd(data[nextIndex], i);
+	for (int i = 0; i < suppliersQty; i++) {
+		err = setOneTimeCostForSupplier(data[nextIndex], i);
 		nextIndex++;
 		if (err != noErrors)
 			return err;
 	}
 
 	//uf
-	for (int i = 0; i < fQty; i++) {
-		err = setInUf(data[nextIndex], i);
+	for (int i = 0; i < factoriesQty; i++) {
+		err = setOneTimeCostForFactories(data[nextIndex], i);
 		nextIndex++;
 		if (err != noErrors)
 			return err;
 	}
 
 	//um
-	for (int i = 0; i < mQty; i++) {
-		err = setInUm(data[nextIndex], i);
+	for (int i = 0; i < storeQty; i++) {
+		err = setOneTimeCostForStore(data[nextIndex], i);
 		nextIndex++;
 		if (err != noErrors)
 			return err;
 	}
 
 	//p
-	for (int i = 0; i < sQty; i++) {
-		err = setInPs(data[nextIndex], i);
+	for (int i = 0; i < shopsQty; i++) {
+		err = setProfitFromOnePieceInShops(data[nextIndex], i);
 		nextIndex++;
 		if (err != noErrors)
 			return err;
 	}
 
 	//xd - min,max
-	for (int i = 0; i < dQty; i++)
-		for (int j = 0; j < fQty; j++) {
-			xdMin->set(data[nextIndex], i, j);
+	for (int i = 0; i < suppliersQty; i++)
+		for (int j = 0; j < factoriesQty; j++) {
+			qtyOfFeedstockDeliverBySuppliersMin->set(data[nextIndex], i, j);
 			nextIndex++;
-			xdMax->set(data[nextIndex], i, j);
+			qtyOfFeedstockDeliverBySuppliersMax->set(data[nextIndex], i, j);
 			nextIndex++;
 		}
 	//xf - min, max
-	for (int i = 0; i < fQty; i++)
-		for (int j = 0; j < mQty; j++) {
-			xfMin->set(data[nextIndex], i, j);
+	for (int i = 0; i < factoriesQty; i++)
+		for (int j = 0; j < storeQty; j++) {
+			qtyOfProductDeliverByFactoriesMin->set(data[nextIndex], i, j);
 			nextIndex++;
-			xfMax->set(data[nextIndex], i, j);
+			qtyOfProductDeliverByFactoriesMax->set(data[nextIndex], i, j);
 			nextIndex++;
 		}
 	// xm - min, max
-	for (int i = 0; i < mQty; i++)
-		for (int j = 0; j < sQty; j++) {
-			xmMin->set(data[nextIndex], i, j);
+	for (int i = 0; i < storeQty; i++)
+		for (int j = 0; j < shopsQty; j++) {
+			qtyOfProductDeliverByStoreMin->set(data[nextIndex], i, j);
 			nextIndex++;
-			xmMax->set(data[nextIndex], i, j);
+			qtyOfProductDeliverByStoreMax->set(data[nextIndex], i, j);
 			nextIndex++;
 		}
 
@@ -193,26 +193,26 @@ MscnProblem::errorCodes MscnProblem::setValuesFromData(double* data, int arrSize
 }
 
 bool MscnProblem::validateArrSize(int arrSize) {
-	int correctArrSize = 4 + dQty + fQty + mQty + sQty + dQty * fQty + fQty * mQty + mQty * sQty + dQty + fQty + mQty +
-		sQty + 2 * dQty * fQty + 2 * fQty * mQty + 2 * mQty * sQty;
+	int correctArrSize = 4 + suppliersQty + factoriesQty + storeQty + shopsQty + suppliersQty * factoriesQty + factoriesQty * storeQty + storeQty * shopsQty + suppliersQty + factoriesQty + storeQty +
+		shopsQty + 2 * suppliersQty * factoriesQty + 2 * factoriesQty * storeQty + 2 * storeQty * shopsQty;
 	return correctArrSize == arrSize;
 }
 
-MscnProblem::errorCodes MscnProblem::setDFMS(double* dfmsData) {
+MscnProblem::errorCodes MscnProblem::setInventory(double* dfmsData) {
 	errorCodes err;
-	err = setDQty(dfmsData[0]);
+	err = setSuppliersQty(dfmsData[0]);
 	if (err != noErrors)
 		return err;
 
-	err = setFQty(dfmsData[1]);
+	err = setFactoriesQty(dfmsData[1]);
 	if (err != noErrors)
 		return err;
 
-	err = setMQty(dfmsData[2]);
+	err = setStoreQty(dfmsData[2]);
 	if (err != noErrors)
 		return err;
 
-	err = setSQty(dfmsData[3]);
+	err = setShopsQty(dfmsData[3]);
 	if (err != noErrors)
 		return err;
 
@@ -220,294 +220,294 @@ MscnProblem::errorCodes MscnProblem::setDFMS(double* dfmsData) {
 }
 
 void MscnProblem::makeMatrixes() {
-	cd = new Matrix<double>(fQty, dQty);
-	cf = new Matrix<double>(mQty, fQty);
-	cm = new Matrix<double>(sQty, mQty);
+	fromSuppliersToFactoriesCost = new Matrix<double>(factoriesQty, suppliersQty);
+	fromFactoriesToStoreCost = new Matrix<double>(storeQty, factoriesQty);
+	fromStoreToShopsCost = new Matrix<double>(shopsQty, storeQty);
 
-	xd = new Matrix<double>(fQty, dQty);
-	xf = new Matrix<double>(mQty, fQty);
-	xm = new Matrix<double>(sQty, mQty);
+	qtyOfFeedstockDeliverBySuppliers = new Matrix<double>(factoriesQty, suppliersQty);
+	qtyOfProductDeliverByFactories = new Matrix<double>(storeQty, factoriesQty);
+	qtyOfProductDeliverByStore = new Matrix<double>(shopsQty, storeQty);
 
-	xdMin = new Matrix<double>(fQty, dQty);
-	xfMin = new Matrix<double>(mQty, fQty);
-	xmMin = new Matrix<double>(sQty, mQty);
+	qtyOfFeedstockDeliverBySuppliersMin = new Matrix<double>(factoriesQty, suppliersQty);
+	qtyOfProductDeliverByFactoriesMin = new Matrix<double>(storeQty, factoriesQty);
+	qtyOfProductDeliverByStoreMin = new Matrix<double>(shopsQty, storeQty);
 
-	xdMax = new Matrix<double>(fQty, dQty);
-	xfMax = new Matrix<double>(mQty, fQty);
-	xmMax = new Matrix<double>(sQty, mQty);
+	qtyOfFeedstockDeliverBySuppliersMax = new Matrix<double>(factoriesQty, suppliersQty);
+	qtyOfProductDeliverByFactoriesMax = new Matrix<double>(storeQty, factoriesQty);
+	qtyOfProductDeliverByStoreMax = new Matrix<double>(shopsQty, storeQty);
 }
 
-MscnProblem::errorCodes MscnProblem::setDQty(int qty) {
+MscnProblem::errorCodes MscnProblem::setSuppliersQty(int qty) {
 	if (qty < 0)
 		return incorrectSize;
-	dQty = qty;
+	suppliersQty = qty;
 	resizeAllVectors();
 	makeMatrixes();
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setFQty(int qty) {
+MscnProblem::errorCodes MscnProblem::setFactoriesQty(int qty) {
 	if (qty < 0)
 		return incorrectSize;
-	fQty = qty;
+	factoriesQty = qty;
 	resizeAllVectors();
 	makeMatrixes();
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setMQty(int qty) {
+MscnProblem::errorCodes MscnProblem::setStoreQty(int qty) {
 	if (qty < 0)
 		return incorrectSize;
-	mQty = qty;
+	storeQty = qty;
 	resizeAllVectors();
 	makeMatrixes();
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setSQty(int qty) {
+MscnProblem::errorCodes MscnProblem::setShopsQty(int qty) {
 	if (qty < 0)
 		return incorrectSize;
-	sQty = qty;
+	shopsQty = qty;
 	resizeAllVectors();
 	makeMatrixes();
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setInCd(double value, int i, int j) {
-	return setInMatrix(*cd, value, i, j);
+MscnProblem::errorCodes MscnProblem::setFromSuppliersToFactoriesCost(double value, int i, int j) {
+	return setInMatrix(*fromSuppliersToFactoriesCost, value, i, j);
 }
 
-MscnProblem::errorCodes MscnProblem::setInCf(double value, int i, int j) {
-	return setInMatrix(*cf, value, i, j);
+MscnProblem::errorCodes MscnProblem::setInFromFactoriesToStoreCost(double value, int i, int j) {
+	return setInMatrix(*fromFactoriesToStoreCost, value, i, j);
 }
 
-MscnProblem::errorCodes MscnProblem::setInCm(double value, int i, int j) {
-	return setInMatrix(*cm, value, i, j);
+MscnProblem::errorCodes MscnProblem::setFromStoreToShopsCost(double value, int i, int j) {
+	return setInMatrix(*fromStoreToShopsCost, value, i, j);
 }
 
-MscnProblem::errorCodes MscnProblem::setInSd(double value, int i) {
-	return setInVector(sd, value, i);
+MscnProblem::errorCodes MscnProblem::setSuppliersManufacturingCapacity(double value, int i) {
+	return setInVector(suppliersManufacturingCapacity, value, i);
 }
 
-MscnProblem::errorCodes MscnProblem::setInSf(double value, int i) {
-	return setInVector(sf, value, i);
+MscnProblem::errorCodes MscnProblem::setFactoriesManufacturingCapacity(double value, int i) {
+	return setInVector(factoriesManufacturingCapacity, value, i);
 }
 
-MscnProblem::errorCodes MscnProblem::setInSm(double value, int i) {
-	return setInVector(sm, value, i);
+MscnProblem::errorCodes MscnProblem::setStoreManufacturingCapacity(double value, int i) {
+	return setInVector(storeManufacturingCapacity, value, i);
 }
 
-MscnProblem::errorCodes MscnProblem::setInSs(double value, int i) {
-	return setInVector(ss, value, i);
+MscnProblem::errorCodes MscnProblem::setShopsManufacturingCapacity(double value, int i) {
+	return setInVector(shopsManufacturingCapacity, value, i);
 }
 
-MscnProblem::errorCodes MscnProblem::setInPs(double value, int i) {
-	return setInVector(ps, value, i);
+MscnProblem::errorCodes MscnProblem::setProfitFromOnePieceInShops(double value, int i) {
+	return setInVector(profitFromOnePieceInShops, value, i);
 }
 
-MscnProblem::errorCodes MscnProblem::setInUd(double value, int i) {
-	return setInVector(ud, value, i);
+MscnProblem::errorCodes MscnProblem::setOneTimeCostForSupplier(double value, int i) {
+	return setInVector(oneTimeCostForSupplier, value, i);
 }
 
-MscnProblem::errorCodes MscnProblem::setInUf(double value, int i) {
-	return setInVector(uf, value, i);
+MscnProblem::errorCodes MscnProblem::setOneTimeCostForFactories(double value, int i) {
+	return setInVector(oneTimeCostForFactories, value, i);
 }
 
-MscnProblem::errorCodes MscnProblem::setInUm(double value, int i) {
-	return setInVector(um, value, i);
+MscnProblem::errorCodes MscnProblem::setOneTimeCostForStore(double value, int i) {
+	return setInVector(oneTimeCostForStore, value, i);
 }
 
-int MscnProblem::getDQty() const {
-	return dQty;
+int MscnProblem::getSuppliersQty() const {
+	return suppliersQty;
 }
 
-int MscnProblem::getFQty() const {
-	return fQty;
+int MscnProblem::getFactoriesQty() const {
+	return factoriesQty;
 }
 
-int MscnProblem::getMQty() const {
-	return mQty;
+int MscnProblem::getStoreQty() const {
+	return storeQty;
 }
 
-int MscnProblem::getSQty() const {
-	return sQty;
+int MscnProblem::getShopsQty() const {
+	return shopsQty;
 }
 
-std::vector<double> MscnProblem::getSd() const {
-	return sd;
+std::vector<double> MscnProblem::getSuppliersManufacturingCapacity() const {
+	return suppliersManufacturingCapacity;
 }
 
-std::vector<double> MscnProblem::getSf() const {
-	return sf;
+std::vector<double> MscnProblem::getFactoriesManufacturingCapacity() const {
+	return factoriesManufacturingCapacity;
 }
 
-std::vector<double> MscnProblem::getSm() const {
-	return sm;
+std::vector<double> MscnProblem::getStoreManufacturingCapacity() const {
+	return storeManufacturingCapacity;
 }
 
-std::vector<double> MscnProblem::getSs() const {
-	return ss;
+std::vector<double> MscnProblem::getShopsManufacturingCapacity() const {
+	return shopsManufacturingCapacity;
 }
 
-std::vector<double> MscnProblem::getUd() const {
-	return ud;
+std::vector<double> MscnProblem::getOneTimeCostForSupplier() const {
+	return oneTimeCostForSupplier;
 }
 
-std::vector<double> MscnProblem::getUf() const {
-	return uf;
+std::vector<double> MscnProblem::getOneTimeCostForFactories() const {
+	return oneTimeCostForFactories;
 }
 
-std::vector<double> MscnProblem::getUm() const {
-	return um;
+std::vector<double> MscnProblem::getOneTimeCostForStore() const {
+	return oneTimeCostForStore;
 }
 
-std::vector<double> MscnProblem::getPs() const {
-	return ps;
+std::vector<double> MscnProblem::getProfitFromOnePieceInShops() const {
+	return profitFromOnePieceInShops;
 }
 
-Matrix<double>* MscnProblem::getCd() const {
-	return cd;
+Matrix<double>* MscnProblem::getFromSuppliersToFactoriesCost() const {
+	return fromSuppliersToFactoriesCost;
 }
 
-Matrix<double>* MscnProblem::getCf() const {
-	return cf;
+Matrix<double>* MscnProblem::getFromFactoriesToStoreCost() const {
+	return fromFactoriesToStoreCost;
 }
 
-Matrix<double>* MscnProblem::getCm() const {
-	return cm;
+Matrix<double>* MscnProblem::getFromStoreToShopsCost() const {
+	return fromStoreToShopsCost;
 }
 
-Matrix<double>* MscnProblem::getXd() const {
-	return xd;
+Matrix<double>* MscnProblem::getQtyOfFeedstockDeliverBySuppliers() const {
+	return qtyOfFeedstockDeliverBySuppliers;
 }
 
-Matrix<double>* MscnProblem::getXf() const {
-	return xf;
+Matrix<double>* MscnProblem::getQtyOfProductDeliverByFactories() const {
+	return qtyOfProductDeliverByFactories;
 }
 
-Matrix<double>* MscnProblem::getXm() const {
-	return xm;
+Matrix<double>* MscnProblem::getQtyOfProductDeliverByStore() const {
+	return qtyOfProductDeliverByStore;
 }
 
-Matrix<double>* MscnProblem::getXdMin() const {
-	return xdMin;
+Matrix<double>* MscnProblem::getQtyOfFeedstockDeliverBySuppliersMin() const {
+	return qtyOfFeedstockDeliverBySuppliersMin;
 }
 
-Matrix<double>* MscnProblem::getXfMin() const {
-	return xfMin;
+Matrix<double>* MscnProblem::getQtyOfProductDeliverByFactoriesMin() const {
+	return qtyOfProductDeliverByFactoriesMin;
 }
 
-Matrix<double>* MscnProblem::getXmMin() const {
-	return xmMin;
+Matrix<double>* MscnProblem::getQtyOfProductDeliverByStoreMin() const {
+	return qtyOfProductDeliverByStoreMin;
 }
 
-Matrix<double>* MscnProblem::getXdMax() const {
-	return xdMax;
+Matrix<double>* MscnProblem::getQtyOfFeedstockDeliverBySuppliersMax() const {
+	return qtyOfFeedstockDeliverBySuppliersMax;
 }
 
-double MscnProblem::getMaxX(int offset) {
-	int lastXdIndex = dQty * fQty - 1;
-	int lastXfIndex = lastXdIndex + fQty * mQty;
-	int lastXmIndex = lastXfIndex + mQty * sQty;
+double MscnProblem::getMaxDeliverQty(int offset) {
+	int lastXdIndex = suppliersQty * factoriesQty - 1;
+	int lastXfIndex = lastXdIndex + factoriesQty * storeQty;
+	int lastXmIndex = lastXfIndex + storeQty * shopsQty;
 
 	if (offset <= lastXdIndex) {
-		int yInMatrix = offset % fQty;
-		int xInMatrix = offset / dQty;
-		return xdMax->get(xInMatrix, yInMatrix);
+		int yInMatrix = offset % factoriesQty;
+		int xInMatrix = offset / suppliersQty;
+		return qtyOfFeedstockDeliverBySuppliersMax->get(xInMatrix, yInMatrix);
 	}
 	else if (offset <= lastXfIndex) {
-		int yInMatrix = offset % mQty;
-		int xInMatrix = offset / fQty;
-		return xfMax->get(xInMatrix, yInMatrix);
+		int yInMatrix = offset % storeQty;
+		int xInMatrix = offset / factoriesQty;
+		return qtyOfProductDeliverByFactoriesMax->get(xInMatrix, yInMatrix);
 	}
 	else {
-		int yInMatrix = offset % sQty;
-		int xInMatrix = offset / mQty;
-		return xmMax->get(xInMatrix, yInMatrix);
+		int yInMatrix = offset % shopsQty;
+		int xInMatrix = offset / storeQty;
+		return qtyOfProductDeliverByStoreMax->get(xInMatrix, yInMatrix);
 	}
 }
 
-Matrix<double>* MscnProblem::getXfMax() const {
-	return xfMax;
+Matrix<double>* MscnProblem::getQtyOfProductDeliverByFactoriesMax() const {
+	return qtyOfProductDeliverByFactoriesMax;
 }
 
-Matrix<double>* MscnProblem::getXmMax() const {
-	return xmMax;
+Matrix<double>* MscnProblem::getQtyOfProductDeliverByStoreMax() const {
+	return qtyOfProductDeliverByStoreMax;
 }
 
-double MscnProblem::getQuality(double* solutionArr, int solutionArrSize, errorCodes& errorCode) {
+double MscnProblem::getProfit(double* solutionArr, int solutionArrSize, errorCodes& errorCode) {
 	if ((errorCode = validateSolution(solutionArr, solutionArrSize)) != noErrors)
 		return 0;
-	for (int i = 0; i < dQty; i++)
-		for (int j = 0; j < fQty; j++)
-			xd->set(solutionArr[getIndexInArrAs2D(i, fQty, j)], i, j);
-	for (int i = 0; i < fQty; i++)
-		for (int j = 0; j < mQty; j++)
-			xf->set(solutionArr[xd->getSize() + getIndexInArrAs2D(i, mQty, j)], i, j);
-	for (int i = 0; i < mQty; i++)
-		for (int j = 0; j < sQty; j++)
-			xm->set(solutionArr[xd->getSize() + xf->getSize() + getIndexInArrAs2D(i, sQty, j)], i, j);
-	return getProfit(*xd, *xf, *xm);
+	for (int i = 0; i < suppliersQty; i++)
+		for (int j = 0; j < factoriesQty; j++)
+			qtyOfFeedstockDeliverBySuppliers->set(solutionArr[getIndexInArrAs2D(i, factoriesQty, j)], i, j);
+	for (int i = 0; i < factoriesQty; i++)
+		for (int j = 0; j < storeQty; j++)
+			qtyOfProductDeliverByFactories->set(solutionArr[qtyOfFeedstockDeliverBySuppliers->getSize() + getIndexInArrAs2D(i, storeQty, j)], i, j);
+	for (int i = 0; i < storeQty; i++)
+		for (int j = 0; j < shopsQty; j++)
+			qtyOfProductDeliverByStore->set(solutionArr[qtyOfFeedstockDeliverBySuppliers->getSize() + qtyOfProductDeliverByFactories->getSize() + getIndexInArrAs2D(i, shopsQty, j)], i, j);
+	return getProfit(*qtyOfFeedstockDeliverBySuppliers, *qtyOfProductDeliverByFactories, *qtyOfProductDeliverByStore);
 }
 
-double MscnProblem::getProfit(Matrix<double>& xd, Matrix<double>& xf, Matrix<double>& xm) {
-	return calculateP(xm) - calculateKt(xd, xf, xm) - calculateKu(xd, xf, xm);
+double MscnProblem::getProfit(Matrix<double>& qtyOfFeedstockDeliverBySuppliers, Matrix<double>& qtyOfProductDeliverByFactories, Matrix<double>& qtyOfProductDeliverByStore) {
+	return calculateAllSalesProfit(qtyOfProductDeliverByStore) - calculateAllTransportCosts(qtyOfFeedstockDeliverBySuppliers, qtyOfProductDeliverByFactories, qtyOfProductDeliverByStore) - calculateOnceCosts(qtyOfFeedstockDeliverBySuppliers, qtyOfProductDeliverByFactories, qtyOfProductDeliverByStore);
 }
 
-double MscnProblem::calculateP(Matrix<double>& xm) {
+double MscnProblem::calculateAllSalesProfit(Matrix<double>& qtyOfProductDeliverByStore) {
 	double result = 0;
-	for (int i = 0; i < mQty; ++i)
-		for (int j = 0; j < sQty; ++j)
-			result += ps[j] * xm.get(i, j);
+	for (int i = 0; i < storeQty; ++i)
+		for (int j = 0; j < shopsQty; ++j)
+			result += profitFromOnePieceInShops[j] * qtyOfProductDeliverByStore.get(i, j);
 	return result;
 }
 
-double MscnProblem::calculateKt(Matrix<double>& xd, Matrix<double>& xf, Matrix<double>& xm) {
+double MscnProblem::calculateAllTransportCosts(Matrix<double>& qtyOfFeedstockDeliverBySuppliers, Matrix<double>& qtyOfProductDeliverByFactories, Matrix<double>& qtyOfProductDeliverByStore) {
 	double result = 0;
-	const double dToFCost = fromDtoFcostKt(xd);
-	const double fToMCost = fromFtoMcostKt(xf);
-	const double mToSCost = fromMtoScostKt(xm);
+	const double dToFCost = feedstockDeliverBySuppliersTransportCost(qtyOfFeedstockDeliverBySuppliers);
+	const double fToMCost = productDeliverByFactoriesTransportCost(qtyOfProductDeliverByFactories);
+	const double mToSCost = productDeliverByStoreTransportCost(qtyOfProductDeliverByStore);
 	return dToFCost + fToMCost + mToSCost;
 }
 
-double MscnProblem::fromDtoFcostKt(Matrix<double>& xd) {
+double MscnProblem::feedstockDeliverBySuppliersTransportCost(Matrix<double>& qtyOfFeedstockDeliverBySuppliers) {
 	double result = 0;
-	for (int i = 0; i < dQty; i++)
-		for (int j = 0; j < fQty; j++)
-			if (xd.get(i, j) > 0)
-				result += (*cd).get(i, j) * xd.get(i, j);
+	for (int i = 0; i < suppliersQty; i++)
+		for (int j = 0; j < factoriesQty; j++)
+			if (qtyOfFeedstockDeliverBySuppliers.get(i, j) > 0)
+				result += (*fromSuppliersToFactoriesCost).get(i, j) * qtyOfFeedstockDeliverBySuppliers.get(i, j);
 	return result;
 }
 
-double MscnProblem::fromFtoMcostKt(Matrix<double>& xf) {
+double MscnProblem::productDeliverByFactoriesTransportCost(Matrix<double>& qtyOfProductDeliverByFactories) {
 	double result = 0;
-	for (int i = 0; i < fQty; i++)
-		for (int j = 0; j < mQty; j++)
-			if (xf.get(i, j) > 0)
-				result += (*cf).get(i, j) * xf.get(i, j);
+	for (int i = 0; i < factoriesQty; i++)
+		for (int j = 0; j < storeQty; j++)
+			if (qtyOfProductDeliverByFactories.get(i, j) > 0)
+				result += (*fromFactoriesToStoreCost).get(i, j) * qtyOfProductDeliverByFactories.get(i, j);
 	return result;
 }
 
-double MscnProblem::fromMtoScostKt(Matrix<double>& xm) {
+double MscnProblem::productDeliverByStoreTransportCost(Matrix<double>& qtyOfProductDeliverByStore) {
 	double result = 0;
-	for (int i = 0; i < mQty; i++)
-		for (int j = 0; j < sQty; j++)
-			if (xm.get(i, j) > 0)
-				result += (*cm).get(i, j) * xm.get(i, j);
+	for (int i = 0; i < storeQty; i++)
+		for (int j = 0; j < shopsQty; j++)
+			if (qtyOfProductDeliverByStore.get(i, j) > 0)
+				result += (*fromStoreToShopsCost).get(i, j) * qtyOfProductDeliverByStore.get(i, j);
 	return result;
 }
 
-double MscnProblem::calculateKu(Matrix<double>& xd, Matrix<double>& xf, Matrix<double>& xm) {
+double MscnProblem::calculateOnceCosts(Matrix<double>& qtyOfFeedstockDeliverBySuppliers, Matrix<double>& qtyOfProductDeliverByFactories, Matrix<double>& qtyOfProductDeliverByStore) {
 	double result = 0;
-	for (int i = 0; i < dQty; i++)
-		if (xd.atLeastOneBiggerValThan0InRow(i))
-			result += ud[i];
-	for (int i = 0; i < fQty; i++)
-		if (xf.atLeastOneBiggerValThan0InRow(i))
-			result += uf[i];
-	for (int i = 0; i < mQty; i++)
-		if (xm.atLeastOneBiggerValThan0InRow(i))
-			result += um[i];
+	for (int i = 0; i < suppliersQty; i++)
+		if (qtyOfFeedstockDeliverBySuppliers.atLeastOneBiggerValThan0InRow(i))
+			result += oneTimeCostForSupplier[i];
+	for (int i = 0; i < factoriesQty; i++)
+		if (qtyOfProductDeliverByFactories.atLeastOneBiggerValThan0InRow(i))
+			result += oneTimeCostForFactories[i];
+	for (int i = 0; i < storeQty; i++)
+		if (qtyOfProductDeliverByStore.atLeastOneBiggerValThan0InRow(i))
+			result += oneTimeCostForStore[i];
 	return result;
 }
 
@@ -515,36 +515,36 @@ bool MscnProblem::constraintsSatisfied(double* solution, int arrSize, errorCodes
 	if ((errorCode = validateSolution(solution, arrSize)) != noErrors)
 		return false;
 
-	Matrix<double> xd(fQty, dQty);
-	Matrix<double> xf(mQty, fQty);
-	Matrix<double> xm(sQty, mQty);
+	Matrix<double> xd(factoriesQty, suppliersQty);
+	Matrix<double> xf(storeQty, factoriesQty);
+	Matrix<double> xm(shopsQty, storeQty);
 
-	for (int i = 0; i < dQty; i++)
-		for (int j = 0; j < fQty; j++)
-			xd.set(solution[getIndexInArrAs2D(i, fQty, j)], i, j);
-	for (int i = 0; i < fQty; i++)
-		for (int j = 0; j < mQty; j++)
-			xf.set(solution[xd.getSize() + getIndexInArrAs2D(i, mQty, j)], i, j);
-	for (int i = 0; i < mQty; ++i)
-		for (int j = 0; j < sQty; ++j)
-			xm.set(solution[xd.getSize() + xf.getSize() + getIndexInArrAs2D(i, sQty, j)], i, j);
+	for (int i = 0; i < suppliersQty; i++)
+		for (int j = 0; j < factoriesQty; j++)
+			xd.set(solution[getIndexInArrAs2D(i, factoriesQty, j)], i, j);
+	for (int i = 0; i < factoriesQty; i++)
+		for (int j = 0; j < storeQty; j++)
+			xf.set(solution[xd.getSize() + getIndexInArrAs2D(i, storeQty, j)], i, j);
+	for (int i = 0; i < storeQty; ++i)
+		for (int j = 0; j < shopsQty; ++j)
+			xm.set(solution[xd.getSize() + xf.getSize() + getIndexInArrAs2D(i, shopsQty, j)], i, j);
 
-	for (int i = 0; i < dQty; i++)
-		if (xd.sumInTheRow(i) > sd[i])
+	for (int i = 0; i < suppliersQty; i++)
+		if (xd.sumInTheRow(i) > suppliersManufacturingCapacity[i])
 			return false;
-	for (int i = 0; i < fQty; i++)
-		if (xf.sumInTheRow(i) > sf[i])
+	for (int i = 0; i < factoriesQty; i++)
+		if (xf.sumInTheRow(i) > factoriesManufacturingCapacity[i])
 			return false;
-	for (int i = 0; i < mQty; i++)
-		if (xm.sumInTheRow(i) > sm[i])
+	for (int i = 0; i < storeQty; i++)
+		if (xm.sumInTheRow(i) > storeManufacturingCapacity[i])
 			return false;
-	for (int i = 0; i < sQty; i++)
-		if (xm.sumInColumn(i) > ss[i])
+	for (int i = 0; i < shopsQty; i++)
+		if (xm.sumInColumn(i) > shopsManufacturingCapacity[i])
 			return false;
-	for (int j = 0; j < fQty; j++)
+	for (int j = 0; j < factoriesQty; j++)
 		if (xd.sumInColumn(j) < xf.sumInTheRow(j))
 			return false;
-	for (int i = 0; i < mQty; i++)
+	for (int i = 0; i < storeQty; i++)
 		if (xf.sumInColumn(i) < xm.sumInTheRow(i))
 			return false;
 
@@ -553,40 +553,40 @@ bool MscnProblem::constraintsSatisfied(double* solution, int arrSize, errorCodes
 
 std::vector<double> MscnProblem::minValuesRange() {
 	std::vector<double> v;
-	for (int i = 0; i < dQty; i++)
-		for (int j = 0; j < fQty; j++)
-			v.push_back(xdMin->get(i, j));
-	for (int i = 0; i < fQty; i++)
-		for (int j = 0; j < mQty; j++)
-			v.push_back(xfMin->get(i, j));
-	for (int i = 0; i < mQty; i++)
-		for (int j = 0; j < sQty; j++)
-			v.push_back(xmMin->get(i, j));
+	for (int i = 0; i < suppliersQty; i++)
+		for (int j = 0; j < factoriesQty; j++)
+			v.push_back(qtyOfFeedstockDeliverBySuppliersMin->get(i, j));
+	for (int i = 0; i < factoriesQty; i++)
+		for (int j = 0; j < storeQty; j++)
+			v.push_back(qtyOfProductDeliverByFactoriesMin->get(i, j));
+	for (int i = 0; i < storeQty; i++)
+		for (int j = 0; j < shopsQty; j++)
+			v.push_back(qtyOfProductDeliverByStoreMin->get(i, j));
 	return v;
 }
 
 std::vector<double> MscnProblem::maxValuesRange() {
 	std::vector<double> v;
-	for (int i = 0; i < dQty; i++)
-		for (int j = 0; j < fQty; j++)
-			v.push_back(xdMax->get(i, j));
-	for (int i = 0; i < fQty; i++)
-		for (int j = 0; j < mQty; j++)
-			v.push_back(xfMax->get(i, j));
-	for (int i = 0; i < mQty; i++)
-		for (int j = 0; j < sQty; j++)
-			v.push_back(xmMax->get(i, j));
+	for (int i = 0; i < suppliersQty; i++)
+		for (int j = 0; j < factoriesQty; j++)
+			v.push_back(qtyOfFeedstockDeliverBySuppliersMax->get(i, j));
+	for (int i = 0; i < factoriesQty; i++)
+		for (int j = 0; j < storeQty; j++)
+			v.push_back(qtyOfProductDeliverByFactoriesMax->get(i, j));
+	for (int i = 0; i < storeQty; i++)
+		for (int j = 0; j < shopsQty; j++)
+			v.push_back(qtyOfProductDeliverByStoreMax->get(i, j));
 	return v;
 }
 
-MscnProblem::errorCodes MscnProblem::setDFMSqty(int qtyD, int qtyF, int qtyM, int qtyS) {
+MscnProblem::errorCodes MscnProblem::setInventoryQty(int suppliersQty, int factoriesQty, int storeQty, int shopsQty) {
 	MscnProblem::errorCodes errCode;
 	//work proper because of lazy evaluation 
 	if (
-		(errCode = setDQty(qtyD)) != noErrors
-		|| (errCode = setFQty(qtyF)) != noErrors
-		|| (errCode = setMQty(qtyM)) != noErrors
-		|| (errCode = setSQty(qtyS)) != noErrors
+		(errCode = setSuppliersQty(suppliersQty)) != noErrors
+		|| (errCode = setFactoriesQty(factoriesQty)) != noErrors
+		|| (errCode = setStoreQty(storeQty)) != noErrors
+		|| (errCode = setShopsQty(shopsQty)) != noErrors
 	)
 		return errCode;
 	return noErrors;
@@ -596,27 +596,27 @@ void MscnProblem::setMinMax(double* minMaxData, int startIndex) {
 	//xd - min,max
 	int nextIndex = startIndex;
 	//xd - min,max
-	for (int i = 0; i < dQty; i++)
-		for (int j = 0; j < fQty; j++) {
-			xdMin->set(minMaxData[nextIndex], i, j);
+	for (int i = 0; i < suppliersQty; i++)
+		for (int j = 0; j < factoriesQty; j++) {
+			qtyOfFeedstockDeliverBySuppliersMin->set(minMaxData[nextIndex], i, j);
 			nextIndex++;
-			xdMax->set(minMaxData[nextIndex], i, j);
+			qtyOfFeedstockDeliverBySuppliersMax->set(minMaxData[nextIndex], i, j);
 			nextIndex++;
 		}
 	//xf - min, max
-	for (int i = 0; i < fQty; i++)
-		for (int j = 0; j < mQty; j++) {
-			xfMin->set(minMaxData[nextIndex], i, j);
+	for (int i = 0; i < factoriesQty; i++)
+		for (int j = 0; j < storeQty; j++) {
+			qtyOfProductDeliverByFactoriesMin->set(minMaxData[nextIndex], i, j);
 			nextIndex++;
-			xfMax->set(minMaxData[nextIndex], i, j);
+			qtyOfProductDeliverByFactoriesMax->set(minMaxData[nextIndex], i, j);
 			nextIndex++;
 		}
 	// xm - min, max
-	for (int i = 0; i < mQty; i++)
-		for (int j = 0; j < sQty; j++) {
-			xmMin->set(minMaxData[nextIndex], i, j);
+	for (int i = 0; i < storeQty; i++)
+		for (int j = 0; j < shopsQty; j++) {
+			qtyOfProductDeliverByStoreMin->set(minMaxData[nextIndex], i, j);
 			nextIndex++;
-			xmMax->set(minMaxData[nextIndex], i, j);
+			qtyOfProductDeliverByStoreMax->set(minMaxData[nextIndex], i, j);
 			nextIndex++;
 		}
 }
@@ -626,12 +626,12 @@ void MscnProblem::setMinMax() {
 }
 
 int MscnProblem::getSolutionSize() {
-	int solutionSize = dQty * fQty + fQty * mQty + mQty * sQty;
+	int solutionSize = suppliersQty * factoriesQty + factoriesQty * storeQty + storeQty * shopsQty;
 	return solutionSize;
 }
 
 double* MscnProblem::getDefaultMinMaxData() {
-	int size = (dQty * fQty + fQty * mQty + mQty * sQty) * 2;
+	int size = (suppliersQty * factoriesQty + factoriesQty * storeQty + storeQty * shopsQty) * 2;
 	double* minMax = new double[size];
 	for (int i = 0; i < size; i++)
 		minMax[i] = i % 2 != 0 ? 100 : 0;
@@ -646,87 +646,87 @@ MscnProblem::errorCodes MscnProblem::randomProblemProperty(const unsigned int in
 	RandomGenerator<double> random(instanceSeed);
 	errorCodes errorCode;
 	if (
-		(errorCode = setRandomCd(random)) != noErrors
-		|| (errorCode = setRandomCf(random)) != noErrors
-		|| (errorCode = setRandomCm(random)) != noErrors
+		(errorCode = setRandomFromSuppliersToFactoriesCost(random)) != noErrors
+		|| (errorCode = setRandomFromFactoriesToStoreCost(random)) != noErrors
+		|| (errorCode = setRandomFromStoreToShopsCost(random)) != noErrors
 	)
 		return errorCode;
 	if (
-		(errorCode = setRandomUd(random)) != noErrors
-		|| (errorCode = setRandomUf(random)) != noErrors
-		|| (errorCode = setRandomUm(random)) != noErrors
+		(errorCode = setRandomOneTimeCostForSupplier(random)) != noErrors
+		|| (errorCode = setRandomOneTimeCostForFactories(random)) != noErrors
+		|| (errorCode = setRandomOneTimeCostForStore(random)) != noErrors
 	)
 		return errorCode;
 	if (
 		(errorCode = setRandomSd(random)) != noErrors
-		|| (errorCode = setRandomSf(random)) != noErrors
-		|| (errorCode = setRandomSm(random)) != noErrors
-		|| (errorCode = setRandomSs(random)) != noErrors
+		|| (errorCode = setRandomFactoriesManufacturingCapacity(random)) != noErrors
+		|| (errorCode = setRandomStoreManufacturingCapacity(random)) != noErrors
+		|| (errorCode = setRandomShopsManufacturingCapacity(random)) != noErrors
 	)
 		return errorCode;
 
-	errorCode = setRandomPs(random);
+	errorCode = setRandomProfitFromOnePieceInShops(random);
 
 	return errorCode;
 }
 
-MscnProblem::errorCodes MscnProblem::setRandomCd(RandomGenerator<double>& random) {
+MscnProblem::errorCodes MscnProblem::setRandomFromSuppliersToFactoriesCost(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < dQty; i++)
-		for (int j = 0; j < fQty; j++) {
-			err = setInCd(random.getRandom(MscGeneratorRanges::MIN_CD, MscGeneratorRanges::MAX_CD), i, j);
+	for (int i = 0; i < suppliersQty; i++)
+		for (int j = 0; j < factoriesQty; j++) {
+			err = setFromSuppliersToFactoriesCost(random.getRandom(MscGeneratorRanges::FROM_SUPPLIERS_TO_FACTORIES_COST_MIN, MscGeneratorRanges::FROM_SUPPLIERS_TO_FACTORIES_COST_MAX), i, j);
 			if (err != noErrors)
 				return err;
 		}
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setRandomCf(RandomGenerator<double>& random) {
+MscnProblem::errorCodes MscnProblem::setRandomFromFactoriesToStoreCost(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < fQty; i++)
-		for (int j = 0; j < mQty; j++) {
-			err = setInCf(random.getRandom(MscGeneratorRanges::MIN_CF, MscGeneratorRanges::MAX_CF), i, j);
+	for (int i = 0; i < factoriesQty; i++)
+		for (int j = 0; j < storeQty; j++) {
+			err = setInFromFactoriesToStoreCost(random.getRandom(MscGeneratorRanges::FROM_FACTORIES_TO_STORE_COST_MIN, MscGeneratorRanges::FROM_FACTORIES_TO_STORE_COST_MAX), i, j);
 			if (err != noErrors)
 				return err;
 		}
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setRandomCm(RandomGenerator<double>& random) {
+MscnProblem::errorCodes MscnProblem::setRandomFromStoreToShopsCost(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < mQty; i++)
-		for (int j = 0; j < sQty; j++) {
-			err = setInCm(random.getRandom(MscGeneratorRanges::MIN_CM, MscGeneratorRanges::MAX_CM), i, j);
+	for (int i = 0; i < storeQty; i++)
+		for (int j = 0; j < shopsQty; j++) {
+			err = setFromStoreToShopsCost(random.getRandom(MscGeneratorRanges::FROM_STORE_TO_SHOPS_COST_MIN, MscGeneratorRanges::FROM_STORE_TO_SHOPS_COST_MAX), i, j);
 			if (err != noErrors)
 				return err;
 		}
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setRandomUd(RandomGenerator<double>& random) {
+MscnProblem::errorCodes MscnProblem::setRandomOneTimeCostForSupplier(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < dQty; i++) {
-		err = setInUd(random.getRandom(MscGeneratorRanges::MIN_UD, MscGeneratorRanges::MAX_UD), i);
+	for (int i = 0; i < suppliersQty; i++) {
+		err = setOneTimeCostForSupplier(random.getRandom(MscGeneratorRanges::ONE_TIME_COST_FOR_SUPPLIER_MIN, MscGeneratorRanges::ONE_TIME_COST_FOR_SUPPLIER_MAX), i);
 		if (err != noErrors)
 			return err;
 	}
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setRandomUf(RandomGenerator<double>& random) {
+MscnProblem::errorCodes MscnProblem::setRandomOneTimeCostForFactories(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < fQty; i++) {
-		err = setInUf(random.getRandom(MscGeneratorRanges::MIN_UF, MscGeneratorRanges::MAX_UF), i);
+	for (int i = 0; i < factoriesQty; i++) {
+		err = setOneTimeCostForFactories(random.getRandom(MscGeneratorRanges::ONE_TIME_COST_FOR_FACTORIES_MIN, MscGeneratorRanges::ONE_TIME_COST_FOR_FACTORIES_MAX), i);
 		if (err != noErrors)
 			return err;
 	}
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setRandomUm(RandomGenerator<double>& random) {
+MscnProblem::errorCodes MscnProblem::setRandomOneTimeCostForStore(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < mQty; i++) {
-		err = setInUm(random.getRandom(MscGeneratorRanges::MIN_UM, MscGeneratorRanges::MAX_UM), i);
+	for (int i = 0; i < storeQty; i++) {
+		err = setOneTimeCostForStore(random.getRandom(MscGeneratorRanges::ONE_TIME_COST_FOR_STORE_MIN, MscGeneratorRanges::ONE_TIME_COST_FOR_STORE_MAX), i);
 		if (err != noErrors)
 			return err;
 	}
@@ -735,48 +735,48 @@ MscnProblem::errorCodes MscnProblem::setRandomUm(RandomGenerator<double>& random
 
 MscnProblem::errorCodes MscnProblem::setRandomSd(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < dQty; i++) {
-		err = setInSd(random.getRandom(MscGeneratorRanges::MIN_SD, MscGeneratorRanges::MAX_SD), i);
+	for (int i = 0; i < suppliersQty; i++) {
+		err = setSuppliersManufacturingCapacity(random.getRandom(MscGeneratorRanges::SUPPLIERS_MANUFACTURING_CAPACITY_MIN, MscGeneratorRanges::SUPPLIERS_MANUFACTURING_CAPACITY_MAX), i);
 		if (err != noErrors)
 			return err;
 	}
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setRandomSf(RandomGenerator<double>& random) {
+MscnProblem::errorCodes MscnProblem::setRandomFactoriesManufacturingCapacity(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < fQty; i++) {
-		err = setInSf(random.getRandom(MscGeneratorRanges::MIN_SF, MscGeneratorRanges::MAX_SF), i);
+	for (int i = 0; i < factoriesQty; i++) {
+		err = setFactoriesManufacturingCapacity(random.getRandom(MscGeneratorRanges::FACTORIES_MANUFACTURING_CAPACITY_MIN, MscGeneratorRanges::FACTORIES_MANUFACTURING_CAPACITY_MAX), i);
 		if (err != noErrors)
 			return err;
 	}
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setRandomSm(RandomGenerator<double>& random) {
+MscnProblem::errorCodes MscnProblem::setRandomStoreManufacturingCapacity(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < mQty; i++) {
-		err = setInSm(random.getRandom(MscGeneratorRanges::MIN_SM, MscGeneratorRanges::MAX_SM), i);
+	for (int i = 0; i < storeQty; i++) {
+		err = setStoreManufacturingCapacity(random.getRandom(MscGeneratorRanges::STORE_MANUFACTURING_CAPACITY_MIN, MscGeneratorRanges::STORE_MANUFACTURING_CAPACITY_MAX), i);
 		if (err != noErrors)
 			return err;
 	}
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setRandomSs(RandomGenerator<double>& random) {
+MscnProblem::errorCodes MscnProblem::setRandomShopsManufacturingCapacity(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < sQty; i++) {
-		err = setInSs(random.getRandom(MscGeneratorRanges::MIN_SS, MscGeneratorRanges::MAX_SS), i);
+	for (int i = 0; i < shopsQty; i++) {
+		err = setShopsManufacturingCapacity(random.getRandom(MscGeneratorRanges::SHOPS_MANUFACTURING_CAPACITY_MIN, MscGeneratorRanges::SHOPS_MANUFACTURING_CAPACITY_MAX), i);
 		if (err != noErrors)
 			return err;
 	}
 	return noErrors;
 }
 
-MscnProblem::errorCodes MscnProblem::setRandomPs(RandomGenerator<double>& random) {
+MscnProblem::errorCodes MscnProblem::setRandomProfitFromOnePieceInShops(RandomGenerator<double>& random) {
 	errorCodes err;
-	for (int i = 0; i < sQty; i++) {
-		err = setInPs(random.getRandom(MscGeneratorRanges::MIN_PS, MscGeneratorRanges::MAX_PS), i);
+	for (int i = 0; i < shopsQty; i++) {
+		err = setProfitFromOnePieceInShops(random.getRandom(MscGeneratorRanges::PROFIT_FROM_ONE_PIECE_IN_SHOPS_MIN, MscGeneratorRanges::PROFIT_FROM_ONE_PIECE_IN_SHOPS_MAX), i);
 		if (err != noErrors)
 			return err;
 	}
@@ -789,7 +789,7 @@ int MscnProblem::getIndexInArrAs2D(const int row, const int matrixWidth, const i
 
 MscnProblem::errorCodes MscnProblem::validateSolution(double* solution, const int arrSize) {
 	if (solution == nullptr) return nullptrSolution;
-	const int requiredSize = dQty * fQty + fQty * mQty + mQty * sQty;
+	const int requiredSize = suppliersQty * factoriesQty + factoriesQty * storeQty + storeQty * shopsQty;
 	if (arrSize != requiredSize) return incorrectSize;
 
 	for (int i = 0; i < arrSize; i++)

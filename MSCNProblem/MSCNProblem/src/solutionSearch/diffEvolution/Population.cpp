@@ -12,7 +12,7 @@ Population::Population(MscnProblem* mscnProblem) {
 void Population::initIndividuals(MscnProblem* mscnProblem, int individualsQty) {
 	RandomSearch radomSearch(mscnProblem, 1);
 	for (int i = 0; i < individualsQty; i++) {
-		double* randSolution = radomSearch.findSolution();
+		double* randSolution = radomSearch.findBestSolution();
 		individuals.push_back(new Individual(randSolution, mscnProblem->getSolutionSize()));
 	}
 }
@@ -70,12 +70,12 @@ Individual* Population::makeNewIndividual(int solutionSize, Individual* fitnesse
 double Population::getNewGeneValue(double oldGeneVal, int geneOffset, double baseIndGeneVal, double diffWeight,
                                    double addInd0GeneVal, double addInd1GeneVal) {
 	double newGeneVal = baseIndGeneVal + diffWeight * (addInd0GeneVal - addInd1GeneVal);
-	return (newGeneVal > mscnProblem->getMaxX(geneOffset)) ? oldGeneVal : newGeneVal;
+	return (newGeneVal > mscnProblem->getMaxDeliverQty(geneOffset)) ? oldGeneVal : newGeneVal;
 }
 
 double Population::fitnesse(Individual* ind) const {
 	MscnProblem::errorCodes errCode;
-	return mscnProblem->getQuality(ind->getSolution(), ind->getSolutionSize(), errCode);
+	return mscnProblem->getProfit(ind->getSolution(), ind->getSolutionSize(), errCode);
 }
 
 Individual* Population::getBestIndividualFromPopulation() {

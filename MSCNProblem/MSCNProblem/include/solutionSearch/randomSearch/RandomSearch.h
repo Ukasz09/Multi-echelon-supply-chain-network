@@ -14,7 +14,7 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 public:
-	double* findSolution();
+	double* findBestSolution();
 	void setMscnProblem(MscnProblem* mscnProblem);
 	void setAttemptQty(unsigned long attemptQty);
 private:

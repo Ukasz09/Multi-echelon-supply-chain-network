@@ -5,7 +5,7 @@ RandomSearch::RandomSearch(MscnProblem* mscnProblem, unsigned long attemptQty) {
 	this->attemptQty = attemptQty;
 }
 
-double* RandomSearch::findSolution() {
+double* RandomSearch::findBestSolution() {
 	unsigned long actualQty = 0;
 	double maxProfit = -DBL_MAX;
 	MscnProblem::errorCodes solutionErrorCode;
@@ -16,7 +16,7 @@ double* RandomSearch::findSolution() {
 		if (actualSolution != bestSolution)
 			delete actualSolution;
 		actualSolution = getRandomSolution();
-		const int profit = mscnProblem->getQuality(actualSolution, mscnProblem->getSolutionSize(), solutionErrorCode);
+		const int profit = mscnProblem->getProfit(actualSolution, mscnProblem->getSolutionSize(), solutionErrorCode);
 		if (profit > maxProfit) {
 			delete bestSolution;
 			bestSolution = actualSolution;
@@ -28,17 +28,17 @@ double* RandomSearch::findSolution() {
 }
 
 double* RandomSearch::getRandomSolution() {
-	int D = mscnProblem->getDQty();
-	int F = mscnProblem->getFQty();
-	int M = mscnProblem->getMQty();
-	int S = mscnProblem->getSQty();
+	int D = mscnProblem->getSuppliersQty();
+	int F = mscnProblem->getFactoriesQty();
+	int M = mscnProblem->getStoreQty();
+	int S = mscnProblem->getShopsQty();
 	double* solution = new double[mscnProblem->getSolutionSize()];
 	int nextIndex = 0;
 	//xd
 	for (int i = 0; i < D; i++)
 		for (int j = 0; j < F; j++) {
 			solution[nextIndex] =
-				random.getRandom(mscnProblem->getXdMin()->get(i, j), mscnProblem->getXdMax()->get(i, j));
+				random.getRandom(mscnProblem->getQtyOfFeedstockDeliverBySuppliersMin()->get(i, j), mscnProblem->getQtyOfFeedstockDeliverBySuppliersMax()->get(i, j));
 			nextIndex++;
 		}
 
@@ -46,7 +46,7 @@ double* RandomSearch::getRandomSolution() {
 	for (int i = 0; i < F; i++)
 		for (int j = 0; j < M; j++) {
 			solution[nextIndex] =
-				random.getRandom(mscnProblem->getXfMin()->get(i, j), mscnProblem->getXfMax()->get(i, j));
+				random.getRandom(mscnProblem->getQtyOfProductDeliverByFactoriesMin()->get(i, j), mscnProblem->getQtyOfProductDeliverByFactoriesMax()->get(i, j));
 			nextIndex++;
 		}
 
@@ -54,7 +54,7 @@ double* RandomSearch::getRandomSolution() {
 	for (int i = 0; i < M; i++)
 		for (int j = 0; j < S; j++) {
 			solution[nextIndex] =
-				random.getRandom(mscnProblem->getXmMin()->get(i, j), mscnProblem->getXmMax()->get(i, j));
+				random.getRandom(mscnProblem->getQtyOfProductDeliverByStoreMin()->get(i, j), mscnProblem->getQtyOfProductDeliverByStoreMax()->get(i, j));
 			nextIndex++;
 		}
 

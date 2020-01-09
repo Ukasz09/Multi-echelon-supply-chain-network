@@ -2,28 +2,28 @@
 class MscGeneratorRanges
 {
 public:
-	static const double MAX_CD;
-	static const double MAX_CF;
-	static const double MAX_CM;
-	static const double MIN_CD;
-	static const double MIN_CF;
-	static const double MIN_CM;
-	static const double MAX_UD;
-	static const double MAX_UF;
-	static const double MIN_UD;
-	static const double MIN_UM;
-	static const double MIN_UF;
-	static const double MAX_SD;
-	static const double MAX_SF;
-	static const double MAX_SM;
-	static const double MAX_SS;
-	static const double MIN_SD;
-	static const double MIN_SF;
-	static const double MIN_SM;
-	static const double MIN_SS;
-	static const double MAX_PS;
-	static const double MIN_PS;
-	static const double MAX_UM;
+	static const double FROM_SUPPLIERS_TO_FACTORIES_COST_MAX;
+	static const double FROM_FACTORIES_TO_STORE_COST_MAX;
+	static const double FROM_STORE_TO_SHOPS_COST_MAX;
+	static const double FROM_SUPPLIERS_TO_FACTORIES_COST_MIN;
+	static const double FROM_FACTORIES_TO_STORE_COST_MIN;
+	static const double FROM_STORE_TO_SHOPS_COST_MIN;
+	static const double ONE_TIME_COST_FOR_SUPPLIER_MAX;
+	static const double ONE_TIME_COST_FOR_FACTORIES_MAX;
+	static const double ONE_TIME_COST_FOR_SUPPLIER_MIN;
+	static const double ONE_TIME_COST_FOR_STORE_MIN;
+	static const double ONE_TIME_COST_FOR_FACTORIES_MIN;
+	static const double SUPPLIERS_MANUFACTURING_CAPACITY_MAX;
+	static const double FACTORIES_MANUFACTURING_CAPACITY_MAX;
+	static const double STORE_MANUFACTURING_CAPACITY_MAX;
+	static const double SHOPS_MANUFACTURING_CAPACITY_MAX;
+	static const double SUPPLIERS_MANUFACTURING_CAPACITY_MIN;
+	static const double FACTORIES_MANUFACTURING_CAPACITY_MIN;
+	static const double STORE_MANUFACTURING_CAPACITY_MIN;
+	static const double SHOPS_MANUFACTURING_CAPACITY_MIN;
+	static const double PROFIT_FROM_ONE_PIECE_IN_SHOPS_MAX;
+	static const double PROFIT_FROM_ONE_PIECE_IN_SHOPS_MIN;
+	static const double ONE_TIME_COST_FOR_STORE_MAX;
 	
 private:
 	MscGeneratorRanges()=delete;

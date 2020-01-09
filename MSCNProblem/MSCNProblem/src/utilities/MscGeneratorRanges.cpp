@@ -1,30 +1,30 @@
 #include "../../include/utilities/MscGeneratorRanges.h"
 
-const double MscGeneratorRanges::MAX_CD = 100.0;
-const double MscGeneratorRanges::MAX_CF = 100.0;
-const double MscGeneratorRanges::MAX_CM = 100.0;
+const double MscGeneratorRanges::FROM_SUPPLIERS_TO_FACTORIES_COST_MAX = 100.0;
+const double MscGeneratorRanges::FROM_FACTORIES_TO_STORE_COST_MAX = 100.0;
+const double MscGeneratorRanges::FROM_STORE_TO_SHOPS_COST_MAX = 100.0;
 
-const double MscGeneratorRanges::MIN_CD = 10.0;
-const double MscGeneratorRanges::MIN_CF = 10.0;
-const double MscGeneratorRanges::MIN_CM = 10.0;
+const double MscGeneratorRanges::FROM_SUPPLIERS_TO_FACTORIES_COST_MIN = 10.0;
+const double MscGeneratorRanges::FROM_FACTORIES_TO_STORE_COST_MIN = 10.0;
+const double MscGeneratorRanges::FROM_STORE_TO_SHOPS_COST_MIN = 10.0;
 
-const double MscGeneratorRanges::MAX_UD = 100.0;
-const double MscGeneratorRanges::MAX_UM = 100.0;
-const double MscGeneratorRanges::MAX_UF = 100.0;
+const double MscGeneratorRanges::ONE_TIME_COST_FOR_SUPPLIER_MAX = 100.0;
+const double MscGeneratorRanges::ONE_TIME_COST_FOR_STORE_MAX = 100.0;
+const double MscGeneratorRanges::ONE_TIME_COST_FOR_FACTORIES_MAX = 100.0;
 
-const double MscGeneratorRanges::MIN_UD = 0.0;
-const double MscGeneratorRanges::MIN_UM = 0.0;
-const double MscGeneratorRanges::MIN_UF = 0.0;
+const double MscGeneratorRanges::ONE_TIME_COST_FOR_SUPPLIER_MIN = 0.0;
+const double MscGeneratorRanges::ONE_TIME_COST_FOR_STORE_MIN = 0.0;
+const double MscGeneratorRanges::ONE_TIME_COST_FOR_FACTORIES_MIN = 0.0;
 
-const double MscGeneratorRanges::MAX_SD = 500.0;
-const double MscGeneratorRanges::MAX_SF = 500.0;
-const double MscGeneratorRanges::MAX_SM = 500.0;
-const double MscGeneratorRanges::MAX_SS = 500.0;
+const double MscGeneratorRanges::SUPPLIERS_MANUFACTURING_CAPACITY_MAX = 500.0;
+const double MscGeneratorRanges::FACTORIES_MANUFACTURING_CAPACITY_MAX = 500.0;
+const double MscGeneratorRanges::STORE_MANUFACTURING_CAPACITY_MAX = 500.0;
+const double MscGeneratorRanges::SHOPS_MANUFACTURING_CAPACITY_MAX = 500.0;
 
-const double MscGeneratorRanges::MIN_SD = 10;
-const double MscGeneratorRanges::MIN_SF = 10;
-const double MscGeneratorRanges::MIN_SM = 10;
-const double MscGeneratorRanges::MIN_SS = 10;
+const double MscGeneratorRanges::SUPPLIERS_MANUFACTURING_CAPACITY_MIN = 10;
+const double MscGeneratorRanges::FACTORIES_MANUFACTURING_CAPACITY_MIN = 10;
+const double MscGeneratorRanges::STORE_MANUFACTURING_CAPACITY_MIN = 10;
+const double MscGeneratorRanges::SHOPS_MANUFACTURING_CAPACITY_MIN = 10;
 
-const double MscGeneratorRanges::MAX_PS = 200;
-const double MscGeneratorRanges::MIN_PS = 50;
+const double MscGeneratorRanges::PROFIT_FROM_ONE_PIECE_IN_SHOPS_MAX = 200;
+const double MscGeneratorRanges::PROFIT_FROM_ONE_PIECE_IN_SHOPS_MIN = 50;

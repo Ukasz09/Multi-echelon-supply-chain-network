@@ -67,10 +67,10 @@ bool MscnFileManager::readSolutionFromFile(double** data, int& solutionArrSize) 
 bool MscnFileManager::saveProblemToFile(MscnProblem& problem) {
 	if (!isOpen)
 		return false;
-	int D = problem.getDQty();;
-	int F = problem.getFQty();;
-	int M = problem.getMQty();;
-	int S = problem.getSQty();;
+	int D = problem.getSuppliersQty();;
+	int F = problem.getFactoriesQty();;
+	int M = problem.getStoreQty();;
+	int S = problem.getShopsQty();;
 
 	*file << "D " << D << "\n";
 	*file << "F " << F << "\n";
@@ -79,67 +79,67 @@ bool MscnFileManager::saveProblemToFile(MscnProblem& problem) {
 
 	*file << "\nsd\n";
 	for (int i = 0; i < D; i++)
-		*file << problem.getSd()[i] << " ";
+		*file << problem.getSuppliersManufacturingCapacity()[i] << " ";
 	*file << "\nsf\n";
 	for (int i = 0; i < F; i++)
-		*file << problem.getSf()[i] << " ";
+		*file << problem.getFactoriesManufacturingCapacity()[i] << " ";
 	*file << "\nsm\n";
 	for (int i = 0; i < M; i++)
-		*file << problem.getSm()[i] << " ";
+		*file << problem.getStoreManufacturingCapacity()[i] << " ";
 	*file << "\nss\n";
 	for (int i = 0; i < S; i++)
-		*file << problem.getSs()[i] << " ";
+		*file << problem.getShopsManufacturingCapacity()[i] << " ";
 	*file << "\ncd\n";
 	for (int i = 0; i < D; i++) {
 		for (int j = 0; j < F; j++)
-			*file << problem.getCd()->get(i, j) << " ";
+			*file << problem.getFromSuppliersToFactoriesCost()->get(i, j) << " ";
 		*file << "\n";
 	}
 	*file << "\ncf\n";
 	for (int i = 0; i < F; i++) {
 		for (int j = 0; j < M; j++)
-			*file << problem.getCf()->get(i, j) << " ";
+			*file << problem.getFromFactoriesToStoreCost()->get(i, j) << " ";
 		*file << "\n";
 	}
 	*file << "\ncm\n";
 	for (int i = 0; i < M; i++) {
 		for (int j = 0; j < S; j++)
-			*file << problem.getCm()->get(i, j) << " ";
+			*file << problem.getFromStoreToShopsCost()->get(i, j) << " ";
 		*file << "\n";
 	}
 	*file << "\nud\n";
 	for (int i = 0; i < D; i++)
-		*file << problem.getUd()[i] << " ";
+		*file << problem.getOneTimeCostForSupplier()[i] << " ";
 	*file << "\nuf\n";
 	for (int i = 0; i < F; i++)
-		*file << problem.getUf()[i] << " ";
+		*file << problem.getOneTimeCostForFactories()[i] << " ";
 	*file << "\num\n";
 	for (int i = 0; i < M; i++)
-		*file << problem.getUm()[i] << " ";
+		*file << problem.getOneTimeCostForStore()[i] << " ";
 	*file << "\np\n";
 	for (int i = 0; i < S; i++)
-		*file << problem.getPs()[i] << " ";
+		*file << problem.getProfitFromOnePieceInShops()[i] << " ";
 	*file << "\nxdminmax\n";
 	for (int i = 0; i < D; i++) {
 		for (int j = 0; j < F; j++) {
-			*file << problem.getXdMin()->get(i, j) << " ";
-			*file << problem.getXdMax()->get(i, j) << " ";
+			*file << problem.getQtyOfFeedstockDeliverBySuppliersMin()->get(i, j) << " ";
+			*file << problem.getQtyOfFeedstockDeliverBySuppliersMax()->get(i, j) << " ";
 		}
 		*file << "\n";
 	}
 	*file << "\nxfminmax\n";
 	for (int i = 0; i < F; i++) {
 		for (int j = 0; j < M; j++) {
-			*file << problem.getXfMin()->get(i, j) << " ";
-			*file << problem.getXfMax()->get(i, j) << " ";
+			*file << problem.getQtyOfProductDeliverByFactoriesMin()->get(i, j) << " ";
+			*file << problem.getQtyOfProductDeliverByFactoriesMax()->get(i, j) << " ";
 		}
 		*file << "\n";
 	}
 	*file << "\nxmminmax\n";
 	for (int i = 0; i < M; i++) {
 		for (int j = 0; j < S; j++) {
-			*file << problem.getXmMin()->get(i, j) << " ";
-			*file << problem.getXmMax()->get(i, j) << " ";
+			*file << problem.getQtyOfProductDeliverByStoreMin()->get(i, j) << " ";
+			*file << problem.getQtyOfProductDeliverByStoreMax()->get(i, j) << " ";
 		}
 		*file << "\n";
 	}
@@ -148,10 +148,10 @@ bool MscnFileManager::saveProblemToFile(MscnProblem& problem) {
 bool MscnFileManager::saveSolutionToFile(MscnProblem& problem) {
 	if (!isOpen)
 		return false;
-	int D = problem.getDQty();;
-	int F = problem.getFQty();;
-	int M = problem.getMQty();;
-	int S = problem.getSQty();;
+	int D = problem.getSuppliersQty();;
+	int F = problem.getFactoriesQty();;
+	int M = problem.getStoreQty();;
+	int S = problem.getShopsQty();;
 
 	*file << "D " << D << "\n";
 	*file << "F " << F << "\n";
@@ -161,19 +161,19 @@ bool MscnFileManager::saveSolutionToFile(MscnProblem& problem) {
 	*file << "\nxd\n";
 	for (int i = 0; i < D; i++) {
 		for (int j = 0; j < F; j++)
-			*file << problem.getXd()->get(i, j) << " ";
+			*file << problem.getQtyOfFeedstockDeliverBySuppliers()->get(i, j) << " ";
 		*file << "\n";
 	}
 	*file << "\nxf\n";
 	for (int i = 0; i < F; i++) {
 		for (int j = 0; j < M; j++)
-			*file << problem.getXf()->get(i, j) << " ";
+			*file << problem.getQtyOfProductDeliverByFactories()->get(i, j) << " ";
 		*file << "\n";
 	}
 	*file << "\nxm\n";
 	for (int i = 0; i < M; i++) {
 		for (int j = 0; j < S; j++)
-			*file << problem.getXm()->get(i, j) << " ";
+			*file << problem.getQtyOfProductDeliverByStore()->get(i, j) << " ";
 		*file << "\n";
 	}
 }
