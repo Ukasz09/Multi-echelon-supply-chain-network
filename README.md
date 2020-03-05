@@ -1,10 +1,9 @@
-# Multi echelon supply chain network [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](https://choosealicense.com/licenses/mit/)
+# 🚛 Multi echelon supply chain network [![License](https://img.shields.io/badge/licence-MIT-blue)](https://choosealicense.com/licenses/mit/) [![Status](https://img.shields.io/badge/status-finished-brightgreen)](https://github.com/Ukasz09/Multi-echelon-supply-chain-network)
  
  >Multi-echelon supply chain network with RandomSearch and Differential Evolution </br>
  
  MSCN (Multi-echelon supply chain network) is solution that suggests the right levels of inventory at each stage of the supply chain by simultaneously optimizing inventory balance across multiple echelons </br>
  
----
 ## Solution calculate methods
  - 🔸 Differential evolution (DE) </br>
    - Metaheuristic algorithm, invented by Storn and Price in 1997 </br></br>
@@ -14,7 +13,6 @@
    (In other words, it is a black-box optimization which means finding the minimum or maximum of a function f(x): R^n → R, where we don’t know its analytical form) </br>
  - 🔸 Random Search </br>
  
- ---
   ## How to use 
  1. Make instance of MscnProblem
     - a) Use no-arg constructor. Manual set all parameters of problem (via setters)
@@ -31,11 +29,11 @@ You can also:
 - calculate profit from solution (by calling  ```getProfit``` method from MscnProblem) 
 - save solution to file (by using instance of MscnFileManager (```WRITE_ACCESS``` parameter) with ```saveSolutionToFile``` method
 
----
 ##  Pattern of files format
 ```FileFormat.pdf``` 
  
----
-## Contact
-Created by [@Ukasz09](https://github.com/Ukasz09) <br/>
-gajerski.lukasz@gmail.com - feel free to contact me!
+___
+## 📫 Contact 
+Created by <br/>
+<a href="https://github.com/Ukasz09" target="_blank"><img src="https://avatars0.githubusercontent.com/u/44710226?s=460&v=4"  width="100px;"></a>
+<br/> gajerski.lukasz@gmail.com - feel free to contact me! ✊
